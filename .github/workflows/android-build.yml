@@ -1,0 +1,41 @@
+name: Build Android 64-Bit APK
+
+on:
+  workflow_dispatch: # Ermöglicht es dir, den Build manuell per Klick zu starten
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Quellcode auschecken
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. Java installieren (wird für den Android-Build benötigt)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # 3. Flutter in der Cloud installieren
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      # 4. Abhängigkeiten der App herunterladen
+      - name: Install Dependencies
+        run: flutter pub get
+
+      # 5. APK speziell für 64-Bit Android (arm64-v8a) kompilieren
+      - name: Build Android APK (64-Bit)
+        run: flutter build apk --release --target-platform android-arm64
+
+      # 6. Die fertige APK-Datei als Download bereitstellen
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sansapp-64bit-release
+          path: build/app/outputs/flutter-apk/app-release.apk
